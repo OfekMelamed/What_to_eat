@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#F3F4F8">
+<title>ביס · מה נאכל?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F3F4F8;
+  --card:#FFFFFF;
+  --ink:#14182B;
+  --muted:#697089;
+  --line:#E6E8F0;
+  --blue:#2438E8;
+  --blue-soft:#E8EBFF;
+  --like:#FF4F7B;
+  --nope:#8C91AD;
+  --zest:#FFD23F;
+  --open:#12A150;
+  --closed:#D93A3A;
+  --radius:24px;
+  color-scheme:light;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Assistant","Segoe UI",Arial,sans-serif;font-size:16px;overflow:hidden;overscroll-behavior:none}
+h1,h2,h3{font-family:"Secular One","Assistant",sans-serif;font-weight:400;margin:0;text-wrap:balance}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+a{color:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+[hidden]{display:none!important}
+.ltr{direction:ltr;unicode-bidi:isolate}
+
+.app{height:100%;max-width:470px;margin:0 auto;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 16px calc(env(safe-area-inset-bottom,0px) + 12px);gap:10px}
+
+/* ---------- header ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.logo{font-family:"Secular One",sans-serif;font-size:28px;line-height:1;display:flex;align-items:center;gap:8px;color:var(--blue)}
+.logo .bite{width:28px;height:28px;border-radius:50%;background:var(--blue);position:relative;flex:none}
+.logo .bite::after{content:"";position:absolute;width:13px;height:13px;border-radius:50%;background:var(--bg);top:-3px;left:-3px}
+.likes-btn{background:var(--card);border-radius:999px;padding:7px 14px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px;box-shadow:0 1px 3px rgba(20,24,43,.08)}
+.likes-btn .count{background:var(--like);color:#fff;border-radius:999px;min-width:22px;height:22px;display:inline-grid;place-items:center;font-size:13px;padding:0 6px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:var(--card);border-radius:999px;padding:7px 14px;font-weight:700;font-size:15px;white-space:nowrap;box-shadow:inset 0 0 0 1.5px var(--line)}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:none}
+.chip.small{padding:4px 11px;font-size:14px}
+.meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px 8px;color:var(--muted);font-size:14px}
+.selects{display:flex;gap:6px}
+.sel{display:flex;align-items:center;gap:2px;background:var(--card);border-radius:999px;padding:3px 4px 3px 10px;box-shadow:inset 0 0 0 1.5px var(--line);font-size:14px;color:var(--muted)}
+.sel select{border:0;background:none;font:inherit;font-weight:800;color:var(--ink);padding:2px 2px;outline-offset:2px}
+
+/* ---------- deck & card ---------- */
+.deck{position:relative;flex:1;min-height:0;margin-bottom:16px}
+.card{
+  position:absolute;inset:0;background:var(--card);border-radius:var(--radius);
+  box-shadow:0 14px 34px -14px rgba(20,24,43,.35),0 1px 3px rgba(20,24,43,.06);
+  overflow:hidden;display:flex;flex-direction:column;
+  touch-action:pan-y;user-select:none;-webkit-user-select:none;
+  transform-origin:50% 110%;transition:transform .3s cubic-bezier(.2,.8,.3,1);will-change:transform;
+}
+.card.behind-1{transform:translateY(10px) scale(.955)}
+.card.behind-2{transform:translateY(20px) scale(.91)}
+.card.behind-1 .scroll,.card.behind-2 .scroll{overflow:hidden}
+.scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.card.is-top{cursor:grab}
+
+.hero{position:relative;flex:none;height:clamp(160px,30vh,260px);overflow:hidden;background:var(--c1)}
+.hero .art{position:absolute;inset:0;display:grid;place-items:center;background:var(--c1)}
+.hero .art::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.28) 2px,transparent 2.5px);background-size:22px 22px}
+.hero .art span{font-size:96px;position:relative;transform:rotate(-8deg);filter:drop-shadow(0 8px 10px rgba(0,0,0,.18))}
+.hero img.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:45%;background:linear-gradient(transparent,rgba(0,0,0,.35));pointer-events:none}
+.pill{position:absolute;z-index:2;border-radius:999px;padding:4px 11px;font-weight:700;font-size:13.5px;line-height:1.3;font-variant-numeric:tabular-nums}
+.pill.dist{top:12px;inset-inline-end:12px;background:rgba(20,24,43,.82);color:#fff}
+.pill.status{top:12px;inset-inline-start:12px;background:#fff}
+.pill.status.open{color:var(--open)}
+.pill.status.closed{color:var(--closed)}
+.pill.special{bottom:12px;inset-inline-end:12px;background:var(--zest);color:var(--ink)}
+.credit{position:absolute;z-index:2;bottom:8px;inset-inline-end:12px;color:rgba(255,255,255,.9);font-size:11.5px;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.4);max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.body{flex:none;padding:0 18px 16px;display:flex;flex-direction:column;gap:9px}
+.head{display:flex;align-items:flex-start;gap:12px;margin-top:-30px;position:relative;z-index:3}
+.logo-sq{
+  flex:none;width:62px;height:62px;border-radius:14px;background:#fff;
+  box-shadow:0 0 0 3px #fff,0 6px 14px -4px rgba(20,24,43,.35);
+  display:grid;place-items:center;overflow:hidden;
+}
+.logo-sq img{width:100%;height:100%;object-fit:contain;padding:6px;-webkit-user-drag:none;pointer-events:none}
+.logo-sq .mono{width:100%;height:100%;display:grid;place-items:center;font-family:"Secular One",sans-serif;font-size:26px;color:#fff;background:var(--c2)}
+.head .titles{min-width:0;padding-top:38px}
+.head h2{font-size:25px;line-height:1.1;overflow-wrap:anywhere}
+.line{color:var(--muted);font-size:15px;display:flex;flex-wrap:wrap;gap:0 6px;align-items:center}
+.line .dot::before{content:"·"}
+.star{color:var(--ink);font-weight:800}
+.star svg{width:14px;height:14px;fill:#F5B301;vertical-align:-1px}
+.summary{margin:0;font-size:15.5px;line-height:1.45}
+.note{background:#FFF3C4;border-radius:12px;padding:8px 12px;font-weight:700}
+.facts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:15px}
+.facts li{display:flex;gap:10px;align-items:flex-start}
+.facts svg{width:18px;height:18px;flex:none;margin-top:2px;stroke:var(--muted);fill:none;stroke-width:2}
+.facts .v{min-width:0;overflow-wrap:anywhere}
+.facts a{color:var(--blue);font-weight:700;text-decoration:none}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{background:var(--bg);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:700;color:#454B63}
+.card-actions{display:flex;gap:8px;margin-top:2px}
+.site-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--blue-soft);color:var(--blue);text-decoration:none;font-weight:800;border-radius:14px;padding:11px 12px;font-size:15.5px}
+.site-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.2}
+.src{color:var(--muted);font-size:11.5px;text-align:center}
+
+.stamp{position:absolute;top:26px;z-index:6;font-family:"Secular One",sans-serif;font-size:32px;padding:2px 14px;border:4px solid;border-radius:12px;opacity:0;pointer-events:none;background:rgba(255,255,255,.92)}
+.stamp.yes{color:var(--like);border-color:var(--like);left:20px;transform:rotate(-14deg)}
+.stamp.no{color:var(--nope);border-color:var(--nope);right:20px;transform:rotate(14deg)}
+
+/* ---------- actions ---------- */
+.actions{display:flex;justify-content:center;align-items:center;gap:18px}
+.round{width:62px;height:62px;border-radius:50%;background:var(--card);display:grid;place-items:center;box-shadow:0 8px 20px -8px rgba(20,24,43,.4);transition:transform .15s}
+.round:active{transform:scale(.9)}
+.round svg{width:28px;height:28px}
+.round.nope svg{stroke:var(--nope)}
+.round.like svg{fill:var(--like)}
+.surprise{height:62px;border-radius:999px;background:var(--zest);color:var(--ink);padding:0 22px;font-family:"Secular One",sans-serif;font-size:19px;box-shadow:0 8px 20px -8px rgba(20,24,43,.4);display:flex;align-items:center;gap:8px;transition:transform .15s}
+.surprise:active{transform:scale(.94)}
+.surprise svg{width:24px;height:24px}
+.hint{color:var(--muted);text-align:center;font-size:13px;margin:0}
+
+/* ---------- full screens ---------- */
+.screen{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(env(safe-area-inset-top,0px) + 24px) 20px calc(env(safe-area-inset-bottom,0px) + 24px);text-align:center;color:#fff;gap:16px;background:var(--blue)}
+.screen .big{font-size:clamp(44px,14vw,62px);line-height:1}
+.screen p{max-width:32ch;margin:0;font-size:18px;line-height:1.5}
+.screen .from{opacity:.8;font-size:16px}
+.btn{background:#fff;color:var(--blue);border-radius:999px;padding:14px 26px;font-family:"Secular One",sans-serif;font-size:20px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.ghost{background:rgba(255,255,255,.18);color:#fff}
+.btn.pink{background:var(--like);color:#fff}
+.plates{display:flex;gap:10px;font-size:40px}
+.plates span{animation:bob 1.6s ease-in-out infinite}
+.plates span:nth-child(2){animation-delay:.2s}.plates span:nth-child(3){animation-delay:.4s}
+@keyframes bob{50%{transform:translateY(-10px)}}
+
+.match{background:var(--like);overflow-y:auto;justify-content:flex-start}
+.match .inner{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;align-items:center;margin-block:auto}
+.match .big{font-size:clamp(46px,15vw,68px);transform:rotate(-4deg);text-shadow:0 4px 0 rgba(0,0,0,.12)}
+.match-card{width:100%;background:var(--card);color:var(--ink);border-radius:var(--radius);overflow:hidden;text-align:start;box-shadow:0 18px 40px -12px rgba(60,0,20,.5)}
+.match-card .hero{height:170px;min-height:0}
+.match-card .body{padding-bottom:18px}
+.nav-title{font-weight:800;font-size:17px;margin-top:4px}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.links a{background:#fff;color:var(--ink);text-decoration:none;border-radius:18px;padding:15px 10px;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;gap:8px}
+.links a.waze{background:#33CCFF}
+.links svg{width:22px;height:22px;flex:none;stroke:currentColor;fill:none;stroke-width:2.2}
+.hearts{position:fixed;inset:0;pointer-events:none;z-index:21;overflow:hidden}
+.hearts i{position:absolute;bottom:-40px;font-style:normal;font-size:26px;animation:rise linear forwards}
+@keyframes rise{to{transform:translateY(-115vh) rotate(40deg);opacity:0}}
+
+.slot{background:var(--zest);color:var(--ink)}
+.slot .reel{font-family:"Secular One",sans-serif;font-size:clamp(28px,9vw,40px);min-height:2.6em;display:grid;place-items:center;max-width:14ch;line-height:1.2}
+.slot .reel-emoji{font-size:90px}
+
+.drawer{position:fixed;inset:0;z-index:15;background:rgba(20,24,43,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);width:100%;max-width:470px;max-height:80%;border-radius:24px 24px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom,0px) + 18px);display:flex;flex-direction:column;gap:12px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center}
+.sheet-head h2{font-size:24px}
+.sheet ul{list-style:none;margin:0;padding:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.sheet li{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:16px;padding:8px 10px}
+.sheet li .logo-sq{width:46px;height:46px;border-radius:11px;box-shadow:0 0 0 1px var(--line)}
+.sheet li .logo-sq .mono{font-size:20px}
+.sheet li .t{flex:1;min-width:0}
+.sheet li .t b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet li .t small{color:var(--muted)}
+.sheet li a{background:var(--blue);color:#fff;text-decoration:none;border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px}
+.close{background:var(--bg);border-radius:999px;padding:6px 14px;font-weight:800}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<section class="screen" id="welcome">
+  <div class="plates" aria-hidden="true"><span>🍕</span><span>🍣</span><span>🌮</span></div>
+  <h1 class="big" id="welcomeTitle">היי</h1>
+  <p id="dedication"></p>
+  <p class="from" id="fromLine"></p>
+  <button class="btn" id="startBtn">בואי נמצא מה לאכול</button>
+  <p class="from" style="font-size:14px">נצטרך את המיקום שלך כדי למצוא מקומות קרובים</p>
+</section>
+
+<section class="screen" id="loading" hidden>
+  <div class="plates" aria-hidden="true"><span>🥙</span><span>🍜</span><span>🍰</span></div>
+  <h2 class="big" style="font-size:34px" id="loadingText">מחפש מקומות סביבך…</h2>
+  <p id="loadingSub">זה לוקח כמה שניות</p>
+  <button class="btn" id="retryBtn" hidden>לנסות שוב</button>
+  <p id="errDetail" class="ltr" style="font-size:12px;opacity:.7;max-width:40ch" hidden></p>
+</section>
+
+<main class="app" id="app" hidden>
+  <header class="topbar">
+    <div class="logo"><span class="bite" aria-hidden="true"></span>ביס</div>
+    <button class="likes-btn" id="likesBtn"><span>המאצ'ים שלי</span><span class="count" id="likesCount">0</span></button>
+  </header>
+  <div class="chips" id="filters" role="group" aria-label="סוג מקום"></div>
+  <div class="meta">
+    <span id="metaCount"></span>
+    <div class="selects">
+      <label class="sel"><span>סדר:</span><select id="sortSel"><option value="mix">מומלץ</option><option value="pop">הכי פופולרי</option><option value="near">הכי קרוב</option></select></label>
+      <label class="sel"><span>רדיוס:</span><select id="radiusSel"></select></label>
+    </div>
+  </div>
+  <div class="deck" id="deck" aria-live="polite"></div>
+  <div class="actions">
+    <button class="round nope" id="nopeBtn" aria-label="לא הפעם"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <button class="surprise" id="surpriseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="16" cy="16" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>תפתיע אותי</button>
+    <button class="round like" id="likeBtn" aria-label="בא לי"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.3 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.8 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg></button>
+  </div>
+  <p class="hint">ימינה = בא לי · שמאלה = לא הפעם · אפשר לגלול בכרטיס למטה</p>
+</main>
+
+<section class="screen match" id="match" hidden>
+  <div class="inner">
+    <h2 class="big" dir="ltr">It's a Match!</h2>
+    <p id="matchLine"></p>
+    <div class="match-card" id="matchCard"></div>
+    <div class="nav-title">איך מגיעים?</div>
+    <div class="links" id="matchLinks"></div>
+    <button class="btn ghost" id="keepSwiping">להמשיך להחליק</button>
+  </div>
+</section>
+<div class="hearts" id="hearts" aria-hidden="true"></div>
+
+<section class="screen slot" id="slot" hidden>
+  <div class="reel-emoji" id="reelEmoji">🎲</div>
+  <div class="reel" id="reel">מגריל…</div>
+</section>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head"><h2 id="sheetTitle">המאצ'ים שלי</h2><button class="close" id="closeDrawer">סגירה</button></div>
+    <ul id="likesList"></ul>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ✏️ הגדרות — לשנות לפני שנותנים לה
+   ========================================================= */
+const CONFIG = {
+  herName: "אהובה",
+  from: "באהבה, אופק",
+  dedication: "הכנתי לך משהו קטן לרגעים שאת לא יודעת מה בא לך לאכול. תחליקי עד שמשהו עושה לך חשק.",
+
+  // מפתח Google Maps (לא חובה). כשהוא מלא: תמונות אמיתיות של כל מקום, דירוג, מחיר ושעות.
+  // כשהוא ריק: נתונים מ-OpenStreetMap ותמונות להמחשה לפי סוג האוכל.
+  googleApiKey: "",
+
+  // מקומות מיוחדים שלכם. יופיעו ככרטיס מיוחד בין הראשונים.
+  // photo / logo: קישור לתמונה (לא חובה). קואורדינטות: לחיצה ארוכה על המקום בגוגל מפות.
+  specialPlaces: [
+    // { name: "המקום של הדייט הראשון", note: "פה הכל התחיל ❤️", lat: 32.0853, lon: 34.7818, emoji: "🍝", website: "", photo: "", logo: "" },
+  ],
+  defaultRadiusKm: 2,
+};
+
+/* ========================================================= */
+const RADII = [1, 2, 5, 10];
+const OVERPASS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+];
+
+/* תמונות להמחשה (Unsplash, רישיון חופשי) לפי סוג אוכל */
+const STOCK = {
+  pizza:["1513104890138-7c749659a591","1565299624946-b28f40a0ae38","1604382354936-07c5d9983bd3","1574071318508-1cdbab80d002"],
+  burger:["1568901346375-23c9450c58cd","1586190848861-99aa4a171e90","1572802419224-296b0aeee0d9","1550547660-d9450f859349"],
+  sushi:["1579584425555-c3ce17fd4351","1579871494447-9811cf80d66c","1553621042-f6e147245754","1615361200141-f45040f367be"],
+  falafel:["1593001872095-7d5b3868fb1d","1637861004714-49fa0ccbb993","1680990999782-ba7fe26e4d0b"],
+  shawarma:["1530469912745-a215c6b256ea","1662116765994-1e4200c43589","1719282431565-3b30bb7d2658"],
+  hummus:["1637949385162-e416fb15b2ce","1603133872497-f29809b750bf","1591299177061-2151e53fcaea"],
+  cafe:["1593443320739-77f74939d0da","1564327367919-cb377ea6a88f","1559001724-fbad036dbc9e","1534687941688-651ccaafbff8"],
+  icecream:["1497034825429-c343d7c6a68f","1562790879-dfde82829db0","1629385701021-fcd568a743e8","1559703248-dcaaec9fab78"],
+  pasta:["1621996346565-e3dbc646d9a9","1611270629569-8b357cb88da9","1556761223-4c4282c73f77","1546549032-9571cd6b27df"],
+  ramen:["1569718212165-3a8278d5f624","1526318896980-cf78c088247c","1623341214825-9f4f963727da"],
+  tacos:["1599974579688-8dbdd335c77f","1565299585323-38d6b0865b47","1551504734-5ee1c4a1479b"],
+  steak:["1588168333986-5078d3ae3976","1600891964092-4316c288032e","1546964124-0cce460f38ef"],
+  salad:["1512621776951-a57141f2eefd","1546069901-ba9599a7e63c","1623428187969-5da2dcea5ebf"],
+  brunch:["1621523132966-19f711d565d1","1504754524776-8f4f37790ca0","1611601184963-9d1de9b79ff3"],
+  dessert:["1530648672449-81f6c723e2f1","1516054575922-f0b8eeadec1a","1576618148423-df549bcb6972"],
+  cocktail:["1566417713940-fe7c737a9ef2","1597075687490-8f673c6c17f6","1607622750671-6cd9a99eabd1"],
+  beer:["1546622891-02c72c1537b6","1567696911980-2eed69a46042","1555658636-6e4a36218be7"],
+  curry:["1585937421612-70a008356fbe","1565557623262-b51c2513a641","1631452180539-96aca7d48617"],
+  bakery:["1623334044303-241021148842","1599940778173-e276d4acb2bb","1691480162735-9b91238080f6"],
+  dimsum:["1604632910793-c0601f361b34","1523905330026-b8bd1f5f320e","1559667709-eabb5b50117a"],
+  restaurant:["1600891964599-f61ba0e24092","1544025162-d76694265947","1651440204227-a9a5b9d19712","1667388969250-1c7220bf3f37"],
+};
+const stockUrl = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=800&h=600&q=70`;
+
+const AMENITY = {
+  restaurant:{he:"מסעדה",e:"🍽️",c:["#FF8A5B","#E8603A"],s:"restaurant"},
+  cafe:{he:"בית קפה",e:"☕",c:["#C9A27E","#9C6E45"],s:"cafe"},
+  fast_food:{he:"אוכל מהיר",e:"🍟",c:["#FFC93C","#E0A000"],s:"burger"},
+  ice_cream:{he:"גלידריה",e:"🍦",c:["#FFB5D0","#E9719D"],s:"icecream"},
+  bar:{he:"בר",e:"🍸",c:["#7C6CF2","#5140CF"],s:"cocktail"},
+  pub:{he:"פאב",e:"🍺",c:["#E0A030","#B8780C"],s:"beer"},
+  food_court:{he:"מתחם אוכל",e:"🥡",c:["#5CC9A7","#2E9C7A"],s:"restaurant"},
+  biergarten:{he:"גן בירה",e:"🍻",c:["#E0A030","#B8780C"],s:"beer"},
+};
+/* key: [שם, אימוג'י, צבע, צבע כהה, סוג תמונה] */
+const CUISINE = {
+  pizza:["פיצה","🍕","#FF6B5B","#D9392C","pizza"], burger:["המבורגר","🍔","#F4A43B","#C97812","burger"],
+  hamburger:["המבורגר","🍔","#F4A43B","#C97812","burger"],
+  sushi:["סושי","🍣","#FF9AA2","#DE5563","sushi"], japanese:["יפני","🍱","#FF9AA2","#DE5563","sushi"],
+  ramen:["ראמן","🍜","#F7C873","#D29522","ramen"], noodle:["נודלס","🍜","#F7C873","#D29522","ramen"],
+  asian:["אסייתי","🥢","#F28C6B","#CF5530","ramen"], chinese:["סיני","🥡","#E85D5D","#B82E2E","dimsum"],
+  thai:["תאילנדי","🍛","#9BD66B","#5EA52C","ramen"], vietnamese:["וייטנאמי","🍜","#9BD66B","#5EA52C","ramen"],
+  korean:["קוריאני","🍲","#F2705E","#C63F2D","ramen"], indian:["הודי","🍛","#F5A623","#C77E00","curry"],
+  mexican:["מקסיקני","🌮","#FFB84D","#DB8316","tacos"], italian:["איטלקי","🍝","#7FCB8A","#419A52","pasta"],
+  french:["צרפתי","🥖","#A7C4FF","#5F86DB","bakery"], greek:["יווני","🫒","#7DB7F0","#3A82CC","salad"],
+  falafel:["פלאפל","🧆","#B8D86B","#7EA52C","falafel"], shawarma:["שווארמה","🥙","#F0A35E","#C7702A","shawarma"],
+  kebab:["קבב","🍢","#F0A35E","#C7702A","shawarma"], hummus:["חומוס","🫘","#E6C27A","#B8912F","hummus"],
+  middle_eastern:["מזרחי","🥙","#F0A35E","#C7702A","shawarma"], lebanese:["לבנוני","🥙","#F0A35E","#C7702A","hummus"],
+  israeli:["ישראלי","🥗","#6FCF97","#2F9A5E","hummus"], mediterranean:["ים-תיכוני","🫒","#6FB7E0","#2E83B5","salad"],
+  georgian:["גאורגי","🥟","#E88BA8","#BF4E73","dimsum"], dumplings:["כיסונים","🥟","#E88BA8","#BF4E73","dimsum"],
+  steak_house:["סטייקייה","🥩","#D9695F","#A83328","steak"], steak:["סטייקייה","🥩","#D9695F","#A83328","steak"],
+  grill:["גריל","🍖","#D9695F","#A83328","steak"], barbecue:["ברביקיו","🍖","#D9695F","#A83328","steak"],
+  meat:["בשרים","🍖","#D9695F","#A83328","steak"], seafood:["פירות ים","🦐","#5CC9E0","#1F95B3","sushi"],
+  fish:["דגים","🐟","#5CC9E0","#1F95B3","sushi"], vegan:["טבעוני","🥬","#7ED68A","#3BA14C","salad"],
+  vegetarian:["צמחוני","🥗","#7ED68A","#3BA14C","salad"], salad:["סלטים","🥗","#7ED68A","#3BA14C","salad"],
+  sandwich:["כריכים","🥪","#F2C46D","#C9952A","brunch"], bagel:["בייגל","🥯","#E8B87A","#B98239","bakery"],
+  bakery:["מאפייה","🥐","#E8B87A","#B98239","bakery"], pastry:["מאפים","🥐","#E8B87A","#B98239","bakery"],
+  breakfast:["ארוחת בוקר","🍳","#FFD166","#D9A21E","brunch"], brunch:["בראנץ'","🥞","#FFD166","#D9A21E","brunch"],
+  coffee_shop:["קפה","☕","#C9A27E","#9C6E45","cafe"], coffee:["קפה","☕","#C9A27E","#9C6E45","cafe"],
+  cafe:["בית קפה","☕","#C9A27E","#9C6E45","cafe"],
+  ice_cream:["גלידה","🍦","#FFB5D0","#E9719D","icecream"], ice_cream_shop:["גלידה","🍦","#FFB5D0","#E9719D","icecream"],
+  dessert:["קינוחים","🍰","#FFB5D0","#E9719D","dessert"], dessert_shop:["קינוחים","🍰","#FFB5D0","#E9719D","dessert"],
+  cake:["עוגות","🍰","#FFB5D0","#E9719D","dessert"], donut:["דונאטס","🍩","#FFB5D0","#E9719D","dessert"],
+  chicken:["עוף","🍗","#F4A43B","#C97812","burger"], hot_dog:["נקניקיות","🌭","#F4A43B","#C97812","burger"],
+  american:["אמריקאי","🍔","#F4A43B","#C97812","burger"], fast_food:["אוכל מהיר","🍟","#FFC93C","#E0A000","burger"],
+  spanish:["ספרדי","🥘","#F7A35C","#CC6D22","tacos"], tapas:["טאפאס","🥘","#F7A35C","#CC6D22","tacos"],
+  turkish:["טורקי","🥙","#E85D5D","#B82E2E","shawarma"], ethiopian:["אתיופי","🍲","#D9A15F","#A86E26","curry"],
+  yemeni:["תימני","🫓","#E6C27A","#B8912F","hummus"], moroccan:["מרוקאי","🍲","#E88A5B","#BF5A28","curry"],
+  international:["בינלאומי","🌍","#8FA8FF","#4E6BE0","restaurant"], regional:["מקומי","🍽️","#FF8A5B","#E8603A","restaurant"],
+  juice:["מיצים","🧃","#9BE07A","#5CB33A","salad"], bubble_tea:["באבל טי","🧋","#D6B28A","#A87E4E","cafe"],
+  crepe:["קרפים","🥞","#FFD166","#D9A21E","dessert"], waffle:["וופלים","🧇","#FFD166","#D9A21E","dessert"],
+  bar:["בר","🍸","#7C6CF2","#5140CF","cocktail"], wine_bar:["בר יין","🍷","#9C5B8F","#6E2F62","cocktail"],
+  pub:["פאב","🍺","#E0A030","#B8780C","beer"],
+};
+const FILTERS = [
+  { id:"all", he:"הכל", test:() => true },
+  { id:"open", he:"פתוח עכשיו", test:p => p.openNow === true },
+  { id:"rest", he:"מסעדות", test:p => p.amenity === "restaurant" },
+  { id:"fast", he:"מהיר וזול", test:p => p.amenity === "fast_food" || p.amenity === "food_court" || p.price === 1 },
+  { id:"sweet", he:"קפה ומתוק", test:p => ["cafe","ice_cream"].includes(p.amenity) || p.cuisines.some(c => ["dessert","cake","donut","ice_cream","coffee_shop","bakery","pastry","crepe","waffle"].includes(c)) },
+  { id:"veg", he:"טבעוני/צמחוני", test:p => p.vegan || p.vegetarian },
+  { id:"kosher", he:"כשר", test:p => p.kosher },
+  { id:"top", he:"דירוג 4.5+", test:p => p.rating >= 4.5 },
+  { id:"bar", he:"ברים", test:p => ["bar","pub","biergarten"].includes(p.amenity) },
+];
+const DAYS_HE = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+
+const S = { pos:null, radius:CONFIG.defaultRadiusKm, all:[], deck:[], idx:0, filter:"all", seen:new Set(), likes:loadLikes(), source:"osm", sort:"mix", errors:[] };
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function km(a, b) {
+  const R = 6371, r = x => x * Math.PI / 180;
+  const h = Math.sin(r(b.lat - a.lat)/2)**2 + Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(r(b.lon - a.lon)/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const fmtDist = d => d < 1 ? `${Math.round(d*100)*10} מ׳` : `${d.toFixed(1)} ק״מ`;
+const walkMin = d => Math.max(1, Math.round(d / 4.8 * 60));
+const travel = d => d <= 2.5 ? `${walkMin(d)} דק׳ הליכה` : `~${Math.max(3, Math.round(d / 25 * 60 + 3))} דק׳ נסיעה`;
+const hash = s => { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function loadLikes() { try { return JSON.parse(localStorage.getItem("bis-likes-v2") || "[]"); } catch { return []; } }
+function saveLikes() { try { localStorage.setItem("bis-likes-v2", JSON.stringify(S.likes.slice(0, 60))); } catch {} }
+const hostOf = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
+const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
+
+const ICON = {
+  clock:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`,
+  pin:`<svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
+  phone:`<svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg>`,
+  walk:`<svg viewBox="0 0 24 24"><circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2-6 3 3v3M9 11l2-3 3 1 2 3M11 8l-1 5"/></svg>`,
+  menu:`<svg viewBox="0 0 24 24" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>`,
+  cam:`<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>`,
+  car:`<svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M5 17h14M6 17l1.5-6h9L18 17M7 17v2M17 17v2"/><circle cx="12" cy="7" r="2"/></svg>`,
+  star:`<svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg>`,
+};
+
+/* ---------- location ---------- */
+function getLocation() {
+  return new Promise((res, rej) => {
+    if (!navigator.geolocation) return rej(new Error("nogeo"));
+    navigator.geolocation.getCurrentPosition(
+      p => res({ lat: p.coords.latitude, lon: p.coords.longitude }), rej,
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+  });
+}
+
+/* ---------- OSM opening_hours (common formats) ---------- */
+function osmOpenState(oh, now = new Date()) {
+  if (!oh) return null;
+  oh = oh.trim();
+  if (oh === "24/7") return { open: true, label: "פתוח 24/7" };
+  const D = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+  const today = now.getDay(), yday = (today + 6) % 7, mins = now.getHours() * 60 + now.getMinutes();
+  const dayRe = /^((?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:\s*-\s*(?:Mo|Tu|We|Th|Fr|Sa|Su))?\s*,?\s*)+)\s+(.*)$/;
+  let parsed = false, todayRanges = null, ydayRanges = null;
+  for (const raw of oh.split(";")) {
+    const rule = raw.trim(); if (!rule) continue;
+    let days = null, time = rule;
+    const m = rule.match(dayRe);
+    if (m) { days = m[1]; time = m[2].trim(); }
+    else if (/^(Mo|Tu|We|Th|Fr|Sa|Su|PH|SH)/.test(rule)) { if (!/^(Mo|Tu|We|Th|Fr|Sa|Su)/.test(rule)) continue; }
+    const applies = d => !days || days.split(",").some(seg => {
+      const [a, b] = seg.trim().split(/\s*-\s*/); const ia = D.indexOf(a), ib = b ? D.indexOf(b) : ia;
+      if (ia < 0 || ib < 0) return false; return ia <= ib ? d >= ia && d <= ib : d >= ia || d <= ib;
+    });
+    let ranges;
+    if (/^(off|closed)$/i.test(time)) ranges = [];
+    else {
+      ranges = [...time.matchAll(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/g)].map(g => {
+        const s = +g[1]*60 + +g[2]; let e = +g[3]*60 + +g[4]; if (e <= s) e += 1440;
+        return { s, e, end: `${g[3].padStart(2,"0")}:${g[4]}`, start: `${g[1].padStart(2,"0")}:${g[2]}` };
+      });
+      if (!ranges.length) continue;
+    }
+    parsed = true;
+    if (applies(today)) todayRanges = ranges;
+    if (applies(yday)) ydayRanges = ranges;
+  }
+  if (!parsed) return null;
+  for (const r of ydayRanges || []) if (r.e > 1440 && mins < r.e - 1440) return { open: true, label: `פתוח עד ${r.end}` };
+  for (const r of todayRanges || []) if (mins >= r.s && mins < r.e) return { open: true, label: `פתוח עד ${r.end}` };
+  const next = (todayRanges || []).find(r => r.s > mins);
+  return { open: false, label: next ? `סגור · נפתח ב-${next.start}` : "סגור עכשיו" };
+}
+
+/* ---------- source 0: מאגר ערים משלך (data/*.json, נבנה ע"י scripts/build_city.py) ---------- */
+async function loadCityData(pos) {
+  let idx;
+  try {
+    idx = await withTimeout(fetch("data/index.json", { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }), 6000);
+  } catch { return null; }                                 // אין מאגר — ממשיכים למשיכה חיה
+  const m = 0.03;                                          // קצת מרווח מעבר לגבולות העיר
+  const inside = c => pos.lat >= c.bbox[0] - m && pos.lat <= c.bbox[2] + m && pos.lon >= c.bbox[1] - m && pos.lon <= c.bbox[3] + m;
+  const near = (idx.cities || []).filter(inside)
+    .sort((a, b) => km(pos, { lat: a.center[0], lon: a.center[1] }) - km(pos, { lat: b.center[0], lon: b.center[1] }))[0];
+  if (!near) return null;
+  if (S.cityDoc?.slug === near.slug) return S.cityDoc;
+  try {
+    S.cityDoc = await withTimeout(fetch(`data/${near.slug}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }), 20000);
+    return S.cityDoc;
+  } catch (e) { S.errors.push("city data: " + (e.message || e)); return null; }
+}
+function cityPlaces(doc, pos, radiusKm) {
+  return doc.places.map(q => {
+    const st = osmOpenState(q.hours);
+    return { ...q, source: "city", cuisines: q.cuisines || [], hoursRaw: q.hours || "",
+      openNow: st ? st.open : null, openLabel: st ? st.label : "",
+      photoCredit: q.photo ? "מאתר המקום" : "", dist: km(pos, q) };
+  }).filter(p => p.dist <= radiusKm);
+}
+
+/* ---------- source 1: OpenStreetMap ---------- */
+async function overpassTry(url, q, signal) {
+  const host = hostOf(url);
+  const res = await fetch(url, { method:"POST", body:"data=" + encodeURIComponent(q),
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" }, signal });
+  if (!res.ok) throw new Error(`${host}: HTTP ${res.status}`);
+  let j; try { j = JSON.parse(await res.text()); } catch { throw new Error(`${host}: bad response`); }
+  if (!Array.isArray(j.elements)) throw new Error(`${host}: no elements`);
+  if (!j.elements.length && j.remark) throw new Error(`${host}: ${j.remark.slice(0, 90)}`);
+  return j.elements;
+}
+async function fetchNominatim(pos, radiusKm) {
+  // גיבוי: חיפוש של OpenStreetMap עצמו (עד 40 תוצאות לכל סוג)
+  const dLat = radiusKm / 111, dLon = radiusKm / (111 * Math.cos(pos.lat * Math.PI / 180));
+  const vb = [pos.lon - dLon, pos.lat + dLat, pos.lon + dLon, pos.lat - dLat].map(n => n.toFixed(5)).join(",");
+  const out = new Map();
+  for (const q of ["restaurant", "cafe", "fast food", "bar"]) {
+    try {
+      const u = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&viewbox=${vb}&bounded=1&limit=40&extratags=1&addressdetails=1&accept-language=he`;
+      const j = await withTimeout(fetch(u).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }), 12000);
+      for (const x of j) if (x.category === "amenity" && AMENITY[x.type] && x.name) out.set(x.osm_type + x.osm_id, {
+        type: x.osm_type, id: x.osm_id, lat: +x.lat, lon: +x.lon,
+        tags: { ...(x.extratags || {}), amenity: x.type, name: x.name,
+          "addr:street": x.address?.road, "addr:housenumber": x.address?.house_number,
+          "addr:city": x.address?.city || x.address?.town || x.address?.village },
+      });
+    } catch (e) { S.errors.push("nominatim: " + e.message); }
+    await new Promise(r => setTimeout(r, 1100));   // מדיניות השימוש: בקשה אחת לשנייה
+  }
+  return [...out.values()];
+}
+async function fetchOSM(pos, radiusKm) {
+  const q = `[out:json][timeout:25];
+    (nwr["amenity"~"^(restaurant|cafe|fast_food|ice_cream|bar|pub|food_court|biergarten)$"]["name"](around:${Math.round(radiusKm*1000)},${pos.lat},${pos.lon}););
+    out center tags 400;`;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 28000);
+  let elements = null;
+  try {
+    // שולחים לכל השרתים במקביל ולוקחים את הראשון שעונה
+    elements = await Promise.any(OVERPASS.map(u => overpassTry(u, q, ctrl.signal)));
+  } catch (agg) {
+    for (const e of (agg.errors || [agg])) S.errors.push(e.name === "AbortError" ? "overpass: timeout" : String(e.message || e));
+  } finally { clearTimeout(timer); ctrl.abort(); }
+  if (!elements) {
+    loadingState("עוד רגע…", "שרתי המפות עמוסים, מנסה דרך אחרת");
+    S.usedFallback = true;
+    elements = await fetchNominatim(pos, radiusKm);
+    if (!elements.length) throw new Error("osm-empty");
+  }
+  const places = [];
+  for (const el of elements) { try { const p = osmToPlace(el, pos); if (p) places.push(p); } catch (e) { console.warn("skip", el, e); } }
+  await addWikidataLogos(places);
+  return places;
+}
+function normUrl(u) { if (!u) return ""; u = u.split(";")[0].trim(); return /^https?:\/\//i.test(u) ? u : "https://" + u; }
+function osmToPlace(el, pos) {
+  const t = el.tags || {};
+  const lat = el.lat ?? el.center?.lat, lon = el.lon ?? el.center?.lon;
+  const name = t["name:he"] || t.name;
+  if (!name || lat == null) return null;
+  const cuisines = (t.cuisine || "").toLowerCase().split(/[;,]/).map(s => s.trim().replace(/\s+/g, "_")).filter(Boolean);
+  const street = t["addr:street"] ? `${t["addr:street"]} ${t["addr:housenumber"] || ""}`.trim() : "";
+  let photo = "";
+  if (/^https?:\/\/.+\.(jpe?g|png|webp)$/i.test(t.image || "")) photo = t.image;
+  else if (/^File:/i.test(t.wikimedia_commons || "")) photo = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(t.wikimedia_commons.slice(5))}?width=800`;
+  const st = osmOpenState(t.opening_hours);
+  const p = {
+    id:`osm/${el.type}/${el.id}`, source:"osm", name, lat, lon, amenity:t.amenity, cuisines,
+    website: normUrl(t.website || t["contact:website"] || t.url),
+    menu: normUrl(t["website:menu"] || t["menu:url"] || ""),
+    phone: t.phone || t["contact:phone"] || "",
+    instagram: t["contact:instagram"] || "",
+    hoursRaw: t.opening_hours || "", openNow: st ? st.open : null, openLabel: st ? st.label : "",
+    address: [street, t["addr:city"]].filter(Boolean).join(", "),
+    summary: t["description:he"] || t.description || "",
+    brandQid: t["brand:wikidata"] || "",
+    photo, photoCredit:"",
+    vegan: /yes|only/.test(t["diet:vegan"] || ""), vegetarian: /yes|only/.test(t["diet:vegetarian"] || ""),
+    kosher: /yes|only/.test(t["diet:kosher"] || ""),
+    outdoor: t.outdoor_seating === "yes", takeaway: /yes|only/.test(t.takeaway || ""),
+    delivery: t.delivery === "yes", wheelchair: t.wheelchair === "yes",
+  };
+  p.dist = km(pos, p);
+  return p;
+}
+async function addWikidataLogos(places) {
+  const ids = [...new Set(places.map(p => p.brandQid).filter(q => /^Q\d+$/.test(q)))];
+  const logos = {};
+  for (let i = 0; i < ids.length; i += 50) {
+    try {
+      const url = `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ids.slice(i, i+50).join("|")}&props=claims&format=json&origin=*`;
+      const j = await withTimeout(fetch(url).then(r => r.json()), 6000);
+      for (const [q, ent] of Object.entries(j.entities || {})) {
+        const fn = ent.claims?.P154?.[0]?.mainsnak?.datavalue?.value;
+        if (fn) logos[q] = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fn)}?width=160`;
+      }
+    } catch {}
+  }
+  places.forEach(p => { if (logos[p.brandQid]) p.logo = logos[p.brandQid]; });
+}
+
+/* ---------- source 2: Google Places (optional, needs key) ---------- */
+function loadGoogle() {
+  if (window.google?.maps?.importLibrary) return Promise.resolve();
+  return new Promise((res, rej) => {
+    window.__gmReady = res;
+    const s = document.createElement("script");
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(CONFIG.googleApiKey)}&v=weekly&language=he&loading=async&callback=__gmReady`;
+    s.async = true; s.onerror = () => rej(new Error("gmaps load"));
+    document.head.appendChild(s);
+  });
+}
+const G_BASE = ["id","displayName","location","photos","rating","userRatingCount","priceLevel","websiteURI","nationalPhoneNumber","internationalPhoneNumber","formattedAddress","primaryType","types","editorialSummary","regularOpeningHours","utcOffsetMinutes"];
+const G_EXTRA = ["primaryTypeDisplayName","servesVegetarianFood","hasOutdoorSeating","hasTakeout","hasDelivery","isGoodForChildren"];
+const G_GROUPS = [
+  { types:["restaurant"], rank:"POPULARITY" },
+  { types:["restaurant"], rank:"DISTANCE" },
+  { types:["fast_food_restaurant","pizza_restaurant","hamburger_restaurant","sandwich_shop","middle_eastern_restaurant"], rank:"POPULARITY" },
+  { types:["cafe","coffee_shop","bakery","ice_cream_shop","dessert_shop"], rank:"POPULARITY" },
+  { types:["sushi_restaurant","japanese_restaurant","asian_restaurant","italian_restaurant","mexican_restaurant","indian_restaurant","thai_restaurant","chinese_restaurant","ramen_restaurant"], rank:"POPULARITY" },
+  { types:["steak_house","seafood_restaurant","vegan_restaurant","vegetarian_restaurant","breakfast_restaurant","brunch_restaurant","mediterranean_restaurant"], rank:"POPULARITY" },
+  { types:["bar","pub","wine_bar"], rank:"POPULARITY" },
+];
+async function fetchGoogle(pos, radiusKm) {
+  await withTimeout(loadGoogle(), 12000);
+  const { Place, SearchNearbyRankPreference } = await google.maps.importLibrary("places");
+  let fields = [...G_BASE, ...G_EXTRA];
+  const run = g => Place.searchNearby({
+    fields, maxResultCount: 20, includedPrimaryTypes: g.types, language: "he",
+    rankPreference: SearchNearbyRankPreference[g.rank],
+    locationRestriction: { center: { lat: pos.lat, lng: pos.lon }, radius: Math.min(50000, radiusKm * 1000) },
+  }).then(r => r.places);
+  // אם אחד השדות הנוספים לא נתמך — מנסים שוב רק עם השדות הבסיסיים
+  try { await run(G_GROUPS[0]); } catch { fields = G_BASE; }
+  const results = await Promise.allSettled(G_GROUPS.map(run));
+  const seen = new Map();
+  for (const r of results) if (r.status === "fulfilled") for (const pl of r.value) if (!seen.has(pl.id)) seen.set(pl.id, pl);
+  if (!seen.size) { const err = results.find(r => r.status === "rejected"); throw err ? err.reason : new Error("no results"); }
+  return Promise.all([...seen.values()].map(pl => googleToPlace(pl, pos)));
+}
+const GAMEN = { restaurant:"restaurant", cafe:"cafe", coffee_shop:"cafe", bakery:"cafe", ice_cream_shop:"ice_cream", dessert_shop:"cafe", bar:"bar", wine_bar:"bar", pub:"pub", fast_food_restaurant:"fast_food", sandwich_shop:"fast_food", hamburger_restaurant:"fast_food" };
+const PRICE = { FREE:0, INEXPENSIVE:1, MODERATE:2, EXPENSIVE:3, VERY_EXPENSIVE:4 };
+async function googleToPlace(pl, pos) {
+  const types = [pl.primaryType, ...(pl.types || [])].filter(Boolean);
+  const cuisines = [...new Set(types.map(t => t.replace(/_restaurant$/, "")).filter(t => CUISINE[t] && t !== "restaurant"))];
+  let openNow = null;
+  try { if (pl.regularOpeningHours) openNow = await pl.isOpen(); } catch {}
+  const wd = pl.regularOpeningHours?.weekdayDescriptions;
+  const todayLine = wd ? (wd[(new Date().getDay() + 6) % 7] || "").replace(/^[^:]+:\s*/, "") : "";
+  const ph = pl.photos?.[0];
+  let photo = "", photoCredit = "";
+  try { if (ph) { photo = ph.getURI({ maxWidth: 900, maxHeight: 700 }); photoCredit = ph.authorAttributions?.[0]?.displayName || ""; } } catch {}
+  const lat = pl.location.lat(), lon = pl.location.lng();
+  const p = {
+    id:`g/${pl.id}`, source:"google", name: pl.displayName, lat, lon,
+    amenity: GAMEN[pl.primaryType] || "restaurant", cuisines,
+    typeLabel: pl.primaryTypeDisplayName || "",
+    website: pl.websiteURI || "", menu:"", phone: pl.nationalPhoneNumber || pl.internationalPhoneNumber || "",
+    rating: pl.rating || 0, ratingCount: pl.userRatingCount || 0,
+    price: PRICE[pl.priceLevel] ?? null,
+    openNow: openNow ?? null, openLabel: openNow == null ? "" : openNow ? "פתוח עכשיו" : "סגור עכשיו",
+    todayHours: todayLine, address: pl.formattedAddress || "",
+    summary: pl.editorialSummary || "", photo, photoCredit,
+    vegetarian: !!pl.servesVegetarianFood, outdoor: !!pl.hasOutdoorSeating, takeaway: !!pl.hasTakeout, delivery: !!pl.hasDelivery,
+  };
+  p.dist = km(pos, p);
+  return p;
+}
+
+/* ---------- visuals ---------- */
+function look(p) {
+  if (p.special) return { he:"מקום מיוחד", e:p.emoji || "❤️", c1:"#FF4F7B", c2:"#D92E5A", s:"restaurant" };
+  for (const c of p.cuisines) if (CUISINE[c]) { const [he, e, c1, c2, s] = CUISINE[c]; return { he, e, c1, c2, s }; }
+  const a = AMENITY[p.amenity] || AMENITY.restaurant;
+  return { he: p.typeLabel || a.he, e:a.e, c1:a.c[0], c2:a.c[1], s:a.s };
+}
+function photoChain(p) {
+  const L = look(p), list = STOCK[L.s] || STOCK.restaurant, start = hash(p.id) % list.length;
+  const stock = [...list.slice(start), ...list.slice(0, start)].map(stockUrl);
+  return p.photo ? { first: p.photo, rest: stock, real: true } : { first: stock[0], rest: stock.slice(1), real: false };
+}
+// כשתמונה לא נטענת עוברים לבאה בתור, ובסוף נשאר האיור
+window.imgFallback = img => {
+  const rest = (img.dataset.fb || "").split("|").filter(Boolean);
+  if (img.dataset.real === "1") { img.dataset.real = "0"; const c = img.parentElement.querySelector(".credit"); if (c) c.textContent = "תמונה להמחשה"; }
+  if (rest.length) { img.dataset.fb = rest.slice(1).join("|"); img.src = rest[0]; }
+  else img.remove();
+};
+window.logoCheck = img => { if (img.naturalWidth && img.naturalWidth < 32) logoFail(img); };
+window.logoFail = img => { const box = img.parentElement; img.remove(); box.innerHTML = box.dataset.mono; };
+
+function logoHTML(p, L) {
+  const initials = p.name.replace(/["'׳״]/g, "").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("");
+  const mono = `<span class="mono" style="--c2:${L.c2}">${esc(initials)}</span>`;
+  let src = p.logo || "";
+  if (!src && p.website && hostOf(p.website)) src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostOf(p.website))}&sz=128`;
+  const inner = src ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer" onload="logoCheck(this)" onerror="logoFail(this)">` : mono;
+  return `<div class="logo-sq" data-mono="${esc(mono)}">${inner}</div>`;
+}
+function heroHTML(p, L) {
+  const ch = photoChain(p);
+  const credit = ch.real ? (p.photoCredit ? `צילום: ${p.photoCredit}` : "") : "תמונה להמחשה";
+  return `
+    <div class="hero" style="--c1:${L.c1}">
+      <div class="art"><span aria-hidden="true">${L.e}</span></div>
+      <img class="photo" src="${esc(ch.first)}" data-fb="${esc(ch.rest.join("|"))}" data-real="${ch.real ? 1 : 0}" alt="" referrerpolicy="no-referrer" onerror="imgFallback(this)">
+      ${p.openLabel ? `<span class="pill status ${p.openNow ? "open" : "closed"}">${esc(p.openLabel)}</span>` : ""}
+      <span class="pill dist">${fmtDist(p.dist)}</span>
+      ${p.special ? `<span class="pill special">כרטיס מיוחד בשבילך</span>` : ""}
+      ${credit ? `<span class="credit">${esc(credit)}</span>` : ""}
+    </div>`;
+}
+function metaLine(p, L) {
+  const bits = [`<span>${esc(L.he)}</span>`];
+  if (p.price) bits.push(`<span class="dot"></span><span>${"₪".repeat(p.price)}</span>`);
+  if (p.rating) bits.push(`<span class="dot"></span><span class="star">${ICON.star} ${p.rating.toFixed(1)}</span><span>(${p.ratingCount.toLocaleString("he-IL")})</span>`);
+  return `<div class="line">${bits.join("")}</div>`;
+}
+function cardHTML(p) {
+  const L = look(p);
+  const extra = p.cuisines.map(c => CUISINE[c]?.[0]).filter(x => x && x !== L.he);
+  const tags = [...new Set([p.ratingCount >= 1000 && "פופולרי מאוד", ...extra.slice(0, 3),
+    p.kosher && "כשר", p.vegan && "טבעוני", !p.vegan && p.vegetarian && "אפשרויות צמחוניות",
+    p.outdoor && "ישיבה בחוץ", p.takeaway && "טייק-אוויי", p.delivery && "משלוחים", p.wheelchair && "נגיש"].filter(Boolean))];
+  const hours = p.todayHours ? `היום (${DAYS_HE[new Date().getDay()]}): ${p.todayHours}` : p.hoursRaw;
+  const facts = [
+    `<li>${ICON.walk}<span class="v">${travel(p.dist)} · ${fmtDist(p.dist)}</span></li>`,
+    hours && `<li>${ICON.clock}<span class="v ${p.todayHours ? "" : "ltr"}">${esc(hours)}</span></li>`,
+    p.address && `<li>${ICON.pin}<span class="v">${esc(p.address)}</span></li>`,
+    p.phone && `<li>${ICON.phone}<span class="v"><a class="ltr" href="tel:${esc(p.phone.split(";")[0].replace(/[^\d+]/g, ""))}">${esc(p.phone.split(";")[0])}</a></span></li>`,
+  ].filter(Boolean).join("");
+  const q = encodeURIComponent(`${p.name} ${p.address || ""} תפריט`);
+  const menuUrl = p.menu || p.website;
+  const siteBtn = menuUrl
+    ? `<a class="site-btn" href="${esc(menuUrl)}" target="_blank" rel="noopener">${ICON.menu} ${p.menu ? "לתפריט" : "לאתר ולתפריט"}</a>`
+    : `<a class="site-btn" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">${ICON.menu} לחפש תפריט</a>`;
+  const insta = p.instagram ? `<a class="site-btn" style="flex:0 0 auto" href="${esc(/^https?:/.test(p.instagram) ? p.instagram : "https://instagram.com/" + p.instagram.replace("@", ""))}" target="_blank" rel="noopener" aria-label="אינסטגרם">${ICON.cam}</a>` : "";
+  return `
+    <div class="scroll">${heroHTML(p, L)}
+    <div class="body">
+      <div class="head">${logoHTML(p, L)}<div class="titles"><h2>${esc(p.name)}</h2>${metaLine(p, L)}</div></div>
+      ${p.note ? `<div class="note">${esc(p.note)}</div>` : ""}
+      ${p.summary ? `<p class="summary">${esc(p.summary)}</p>` : ""}
+      <ul class="facts">${facts}</ul>
+      ${tags.length ? `<div class="tags">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
+      <div class="card-actions">${siteBtn}${insta}</div>
+      <div class="src">${p.source === "google" ? "מידע: Google Maps" : p.source === "city" ? "מידע: Overture Maps · © OpenStreetMap" : p.special ? "" : "מידע: © OpenStreetMap"}</div>
+    </div></div>
+    <div class="stamp yes">בא לי</div>
+    <div class="stamp no">לא הפעם</div>`;
+}
+
+/* ---------- deck ---------- */
+/* פופולריות: בגוגל לפי דירוג ומספר מדרגים; ב-OpenStreetMap לפי כמה המקום מתועד (אין שם דירוגים) */
+function popScore(p) {
+  if (p.special) return 1;
+  if (typeof p.pop === "number") return p.pop;          // מחושב מראש במאגר העירוני
+  if (p.ratingCount) {
+    const n = p.ratingCount, bayes = (p.rating * n + 3.9 * 40) / (n + 40);
+    return Math.min(1, Math.max(0, (bayes - 3.6) / 1.3)) * .6 + Math.min(1, Math.log10(n + 1) / 3.5) * .4;
+  }
+  const f = [p.website, p.hoursRaw, p.cuisines.length, p.phone, p.photo, p.brandQid, p.summary, p.instagram, p.address, p.menu];
+  return f.filter(Boolean).length / f.length;
+}
+const distScore = p => Math.exp(-p.dist / Math.max(.5, S.radius * .35));
+function rankKey(p) {
+  if (S.sort === "near") return -p.dist + Math.random() * .03;
+  if (S.sort === "pop") return popScore(p) + Math.random() * .04;
+  return .55 * popScore(p) + .45 * distScore(p) + Math.random() * .1;   // מומלץ: שילוב + קצת הפתעה
+}
+function buildDeck() {
+  const f = FILTERS.find(x => x.id === S.filter);
+  const pool = S.all.filter(p => !S.seen.has(p.id) && f.test(p));
+  S.deck = pool.map(p => [rankKey(p), p]).sort((a, b) => b[0] - a[0]).map(x => x[1]);
+  if (S.filter === "all") CONFIG.specialPlaces.forEach((sp, i) => {
+    const p = { ...sp, id:"special/" + i, special:true, amenity:"restaurant", cuisines:[], dist:km(S.pos, sp), openNow:null };
+    if (S.seen.has(p.id) || p.dist > 40) return;
+    S.deck.splice(Math.min(S.deck.length, 3 + Math.floor(Math.random() * 8)), 0, p);
+  });
+  S.idx = 0;
+  $("metaCount").textContent = `${S.deck.length} מקומות · ${S.sourceLabel}`;
+  renderDeck();
+}
+function renderDeck() {
+  const deck = $("deck");
+  deck.innerHTML = "";
+  const rest = S.deck.slice(S.idx, S.idx + 3);
+  if (!rest.length) {
+    deck.innerHTML = `<div class="card" style="justify-content:center;align-items:center;text-align:center;gap:14px;padding:24px">
+      <div style="font-size:64px">🍽️</div><h2 style="font-size:28px">עברת על הכל!</h2>
+      <p style="margin:0;color:var(--muted);max-width:26ch">אפשר להגדיל את הרדיוס, לנסות סינון אחר, או לתת לגורל להחליט.</p>
+      <button class="btn pink" id="restartBtn">להתחיל מחדש</button></div>`;
+    $("restartBtn").onclick = () => { S.seen.clear(); buildDeck(); };
+    return;
+  }
+  rest.slice().reverse().forEach((p, i, arr) => {
+    const depth = arr.length - 1 - i;
+    const el = document.createElement("article");
+    el.className = "card " + (depth === 0 ? "is-top" : "behind-" + depth);
+    el.innerHTML = cardHTML(p);
+    el.setAttribute("aria-label", p.name);
+    deck.appendChild(el);
+    if (depth === 0) attachDrag(el);
+  });
+}
+
+/* ---------- swipe ---------- */
+function attachDrag(card) {
+  let sx = 0, sy = 0, dx = 0, dy = 0, drag = false;
+  const yes = card.querySelector(".stamp.yes"), no = card.querySelector(".stamp.no");
+  card.addEventListener("pointerdown", e => {
+    if (e.target.closest("a,button")) return;       // לחיצה על קישור בכרטיס לא מתחילה החלקה
+    drag = true; sx = e.clientX; sy = e.clientY; dx = dy = 0;
+    card.style.transition = "none";
+  });
+  card.addEventListener("pointermove", e => {
+    if (!drag) return;
+    dx = e.clientX - sx; dy = e.clientY - sy;
+    if (Math.abs(dx) > 6 && !card.hasPointerCapture(e.pointerId)) card.setPointerCapture(e.pointerId);
+    card.style.transform = `translate(${dx}px, ${dy * .25}px) rotate(${dx / 16}deg)`;
+    yes.style.opacity = Math.max(0, Math.min(1, dx / 90));
+    no.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+  });
+  const end = () => {
+    if (!drag) return; drag = false;
+    card.style.transition = "";
+    if (Math.abs(dx) > Math.min(110, window.innerWidth * .25)) fling(dx > 0 ? 1 : -1, dy);
+    else { card.style.transform = ""; yes.style.opacity = no.style.opacity = 0; }
+  };
+  card.addEventListener("pointerup", end);
+  card.addEventListener("pointercancel", end);
+}
+let busy = false;
+function fling(dir, dy = 0) {
+  const card = $("deck").querySelector(".card.is-top"), p = S.deck[S.idx];
+  if (!card || !p || busy) return;
+  busy = true;
+  card.querySelector(dir > 0 ? ".stamp.yes" : ".stamp.no").style.opacity = 1;
+  card.style.transition = "transform .38s ease-in";
+  card.style.transform = `translate(${dir * window.innerWidth * 1.2}px, ${dy * .25 + 40}px) rotate(${dir * 28}deg)`;
+  S.seen.add(p.id);
+  setTimeout(() => { S.idx++; busy = false; renderDeck(); if (dir > 0) openMatch(p); }, 300);
+}
+
+/* ---------- match: רק ניווט ---------- */
+function openMatch(p, viaSurprise = false) {
+  if (!S.likes.some(l => l.id === p.id)) { S.likes.unshift(p); saveLikes(); }
+  $("likesCount").textContent = S.likes.length;
+  const L = look(p);
+  $("matchLine").textContent = viaSurprise ? "הגורל בחר בשבילך. לא מתווכחים עם הגורל." : `${CONFIG.herName}, בחרת טוב. יאללה לאכול!`;
+  $("matchCard").innerHTML = `${heroHTML(p, L)}
+    <div class="body"><div class="head">${logoHTML(p, L)}<div class="titles"><h2>${esc(p.name)}</h2>${metaLine(p, L)}</div></div>
+    <div class="line">${travel(p.dist)}${p.address ? " · " + esc(p.address) : ""}</div></div>`;
+  $("matchLinks").innerHTML = `
+    <a class="waze" href="https://waze.com/ul?ll=${p.lat},${p.lon}&navigate=yes" target="_blank" rel="noopener">${ICON.car} Waze</a>
+    <a href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}${p.source === "google" ? "&destination_place_id=" + encodeURIComponent(p.id.slice(2)) : ""}" target="_blank" rel="noopener">${ICON.pin} גוגל מפות</a>`;
+  $("match").hidden = false; $("match").scrollTop = 0;
+  burstHearts();
+}
+function burstHearts() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement("i");
+    h.textContent = ["❤️","💖","🍕","💕","🍣"][i % 5];
+    h.style.left = Math.random() * 100 + "vw";
+    h.style.animationDuration = 2.2 + Math.random() * 2 + "s";
+    h.style.animationDelay = Math.random() * .6 + "s";
+    $("hearts").appendChild(h); setTimeout(() => h.remove(), 5000);
+  }
+}
+
+/* ---------- surprise ---------- */
+function surprise() {
+  const f = FILTERS.find(x => x.id === S.filter);
+  let pool = S.deck.slice(S.idx);
+  if (!pool.length) pool = S.all.filter(f.test);
+  if (!pool.length) pool = S.all;
+  if (!pool.length) return;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  $("slot").hidden = false;
+  let n = 0; const total = 16;
+  const spin = () => {
+    const p = n < total - 1 ? pool[Math.floor(Math.random() * pool.length)] : pick;
+    $("reel").textContent = p.name; $("reelEmoji").textContent = look(p).e;
+    if (++n < total) setTimeout(spin, 60 + n * n * 1.6);
+    else setTimeout(() => {
+      $("slot").hidden = true;
+      const i = S.deck.indexOf(pick, S.idx);
+      if (i >= 0) { S.deck.splice(i, 1); S.seen.add(pick.id); renderDeck(); }
+      openMatch(pick, true);
+    }, 700);
+  };
+  spin();
+}
+
+/* ---------- UI wiring ---------- */
+function renderChips() {
+  $("filters").innerHTML = FILTERS.map(f => {
+    if (f.id !== "all" && !S.all.some(f.test)) return "";
+    return `<button class="chip" data-f="${f.id}" aria-pressed="${S.filter === f.id}">${f.he}</button>`;
+  }).join("");
+  $("radiusSel").innerHTML = RADII.map(r => `<option value="${r}" ${S.radius === r ? "selected" : ""}>${r} ק״מ</option>`).join("");
+  $("sortSel").value = S.sort;
+}
+$("filters").onclick = e => { const b = e.target.closest("[data-f]"); if (!b) return; S.filter = b.dataset.f; renderChips(); buildDeck(); };
+$("radiusSel").onchange = e => { S.radius = +e.target.value; load(true); };
+$("sortSel").onchange = e => { S.sort = e.target.value; buildDeck(); };
+$("likeBtn").onclick = () => fling(1);
+$("nopeBtn").onclick = () => fling(-1);
+$("surpriseBtn").onclick = surprise;
+$("keepSwiping").onclick = () => { $("match").hidden = true; };
+$("likesBtn").onclick = () => {
+  $("likesList").innerHTML = S.likes.length ? S.likes.map(p => { const L = look(p); return `
+    <li>${logoHTML(p, L)}<span class="t"><b>${esc(p.name)}</b><small>${esc(L.he)}${p.address ? " · " + esc(p.address) : ""}</small></span>
+      <a href="https://waze.com/ul?ll=${p.lat},${p.lon}&navigate=yes" target="_blank" rel="noopener">סע</a></li>`; }).join("")
+    : `<li style="border:0;justify-content:center;color:var(--muted)">עוד אין מאצ'ים. תחליקי ימינה על משהו טעים.</li>`;
+  $("drawer").hidden = false;
+};
+$("closeDrawer").onclick = () => $("drawer").hidden = true;
+$("drawer").onclick = e => { if (e.target.id === "drawer") $("drawer").hidden = true; };
+document.addEventListener("keydown", e => {
+  if (!$("app").hidden && $("match").hidden && $("drawer").hidden) {
+    if (e.key === "ArrowRight") fling(1);
+    if (e.key === "ArrowLeft") fling(-1);
+  }
+  if (e.key === "Escape") { $("match").hidden = true; $("drawer").hidden = true; }
+});
+
+function show(id) { ["welcome","loading","app"].forEach(x => $(x).hidden = x !== id); }
+function loadingState(title, sub, isError) {
+  show("loading"); $("loadingText").textContent = title; $("loadingSub").textContent = sub; $("retryBtn").hidden = !isError;
+  $("errDetail").hidden = !isError || !S.errors.length;
+  $("errDetail").textContent = [...new Set(S.errors)].slice(-6).join(" | ");
+}
+async function load(keepPos) {
+  try {
+    if (!keepPos || !S.pos) { loadingState("מאתר איפה את…", "אם הטלפון שואל, צריך לאשר גישה למיקום"); S.pos = await getLocation(); }
+    loadingState("מחפש מקומות סביבך…", `ברדיוס ${S.radius} ק״מ`);
+    S.all = []; S.errors = []; S.usedFallback = false; S.sourceLabel = "";
+    const doc = await loadCityData(S.pos);
+    if (doc) {
+      S.all = cityPlaces(doc, S.pos, S.radius); S.source = "city"; S.sourceLabel = `מאגר ${doc.city}`;
+      addWikidataLogos(S.all.filter(p => !p.logo)).then(() => renderDeck()).catch(() => {});
+    }
+    if (!S.all.length && CONFIG.googleApiKey) {
+      try { S.all = await fetchGoogle(S.pos, S.radius); S.source = "google"; S.sourceLabel = "Google"; }
+      catch (e) { S.errors.push("google: " + (e.message || e)); console.warn("Google Places failed, falling back to OSM", e); }
+    }
+    if (!S.all.length) { S.all = await fetchOSM(S.pos, S.radius); S.source = "osm"; S.sourceLabel = S.usedFallback ? "OSM גיבוי" : "OSM חי"; }
+    if (!S.all.length && S.radius < 10) { S.radius = RADII.find(r => r > S.radius); return load(true); }
+    if (S.filter !== "all" && !S.all.some(FILTERS.find(f => f.id === S.filter).test)) S.filter = "all";
+    renderChips(); show("app"); buildDeck();
+  } catch (e) {
+    if (e && e.code === 1) loadingState("צריך אישור מיקום", "בלי מיקום אי אפשר למצוא מקומות קרובים. אפשר לאשר בהגדרות הדפדפן לאתר הזה ולנסות שוב.", true);
+    else if (e && (e.code === 2 || e.code === 3)) loadingState("לא הצלחתי לאתר מיקום", "כדאי לוודא שה-GPS דלוק ולנסות שוב.", true);
+    else {
+      if (e && e.message && e.message !== "osm-empty") S.errors.push(String(e.message));
+      loadingState("לא הצלחתי לטעון מקומות", location.protocol === "file:"
+        ? "נראה שהקובץ נפתח ישירות מהמחשב. כדאי לפתוח אותו מכתובת אינטרנט (למשל GitHub Pages) ולנסות שוב."
+        : "שרתי המפות לא ענו. אפשר לנסות שוב בעוד רגע. אם זה חוזר, שלח לי את השורה הקטנה שלמטה.", true);
+    }
+  }
+}
+
+$("welcomeTitle").textContent = `היי ${CONFIG.herName}`;
+$("dedication").textContent = CONFIG.dedication;
+$("fromLine").textContent = CONFIG.from;
+$("likesCount").textContent = S.likes.length;
+$("startBtn").onclick = () => load(false);
+$("retryBtn").onclick = () => load(!!S.pos);
+</script>
+</body>
+</html>
